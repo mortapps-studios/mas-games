@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flappy Ball - MortApps Studios</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #1a3a1a 0%, #2d5a2d 100%);
+            color: #fff;
+            user-select: none;
+            touch-action: none;
+        }
+        .header {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .brand { display: flex; align-items: center; gap: 0.5rem; }
+        .brand-logo {
+            width: 2rem; height: 2rem; border-radius: 0.5rem;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        .brand-name { font-weight: bold; }
+        .score-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #22c55e;
+            text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+        .game-container {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        #gameCanvas { display: block; background: linear-gradient(180deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); }
+        .overlay {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10;
+        }
+        .overlay.hidden { display: none; }
+        .overlay-content { text-align: center; padding: 2rem; }
+        .overlay-emoji { font-size: 4rem; margin-bottom: 1rem; }
+        .overlay-title { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; color: #22c55e; }
+        .overlay-subtitle { font-size: 0.9rem; opacity: 0.7; margin-bottom: 1.5rem; }
+        .btn-primary {
+            padding: 0.75rem 2rem; border: none; border-radius: 0.75rem;
+            font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #000;
+        }
+        .btn-primary:hover { transform: scale(1.05); }
+        .final-score { font-size: 3rem; font-weight: bold; color: #22c55e; margin: 1rem 0; }
+        .high-score { font-size: 1rem; color: #fbbf24; margin-bottom: 1rem; }
+        .footer { margin-top: 1.5rem; font-size: 0.75rem; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">
+            <div class="brand-logo">🐦</div>
+            <span class="brand-name">MortApps Studios</span>
+        </div>
+        <div id="scoreDisplay" class="score-display">0</div>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="startOverlay" class="overlay">
+            <div class="overlay-content">
+                <div class="overlay-emoji">🐦</div>
+                <h1 class="overlay-title">Flappy Ball</h1>
+                <p class="overlay-subtitle">Tap or press Space to fly through the pipes!</p>
+                <button id="startBtn" class="btn-primary">▶ Start</button>
+            </div>
+        </div>
+        <div id="gameOverOverlay" class="overlay hidden">
+            <div class="overlay-content">
+                <div class="overlay-emoji">💥</div>
+                <h2 class="overlay-title">Game Over</h2>
+                <div id="finalScore" class="final-score">0</div>
+                <div id="highScore" class="high-score">Best: 0</div>
+                <button id="retryBtn" class="btn-primary">🔄 Retry</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer"><p>© 2026 MortApps Studios</p></div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 360;
+        canvas.height = 540;
+
+        // Game state
+        let gameState = 'start';
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('flappy_high')) || 0;
+        let animationId = null;
+
+        // Bird
+        const bird = {
+            x: 80,
+            y: canvas.height / 2,
+            radius: 15,
+            velocity: 0,
+            gravity: 0.5,
+            jump: -8,
+            rotation: 0
+        };
+
+        // Pipes
+        let pipes = [];
+        const pipeWidth = 60;
+        const pipeGap = 160;
+        const pipeSpeed = 3;
+        let pipeTimer = 0;
+        const pipeInterval = 100;
+
+        // Stars (background)
+        const stars = [];
+        for (let i = 0; i < 50; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 1,
+                speed: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        function resetGame() {
+            bird.y = canvas.height / 2;
+            bird.velocity = 0;
+            bird.rotation = 0;
+            pipes = [];
+            pipeTimer = 0;
+            score = 0;
+            document.getElementById('scoreDisplay').textContent = '0';
+        }
+
+        function flap() {
+            if (gameState === 'playing') {
+                bird.velocity = bird.jump;
+            }
+        }
+
+        function createPipe() {
+            const minHeight = 80;
+            const maxHeight = canvas.height - pipeGap - minHeight;
+            const height = Math.random() * (maxHeight - minHeight) + minHeight;
+            pipes.push({
+                x: canvas.width,
+                topHeight: height,
+                bottomY: height + pipeGap,
+                passed: false
+            });
+        }
+
+        function update() {
+            // Bird physics
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+            bird.rotation = Math.min(Math.max(bird.velocity * 3, -30), 90);
+
+            // Boundaries
+            if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+                gameOver();
+                return;
+            }
+
+            // Pipes
+            pipeTimer++;
+            if (pipeTimer >= pipeInterval) {
+                createPipe();
+                pipeTimer = 0;
+            }
+
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= pipeSpeed;
+
+                // Collision
+                if (bird.x + bird.radius > pipes[i].x && bird.x - bird.radius < pipes[i].x + pipeWidth) {
+                    if (bird.y - bird.radius < pipes[i].topHeight || bird.y + bird.radius > pipes[i].bottomY) {
+                        gameOver();
+                        return;
+                    }
+                }
+
+                // Score
+                if (!pipes[i].passed && pipes[i].x + pipeWidth < bird.x) {
+                    pipes[i].passed = true;
+                    score++;
+                    document.getElementById('scoreDisplay').textContent = score;
+                }
+
+                // Remove off-screen pipes
+                if (pipes[i].x + pipeWidth < 0) {
+                    pipes.splice(i, 1);
+                }
+            }
+        }
+
+        function draw() {
+            // Clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Stars
+            ctx.fillStyle = '#fff';
+            stars.forEach(star => {
+                ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 500 + star.x) * 0.3;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+                star.x -= star.speed;
+                if (star.x < 0) star.x = canvas.width;
+            });
+            ctx.globalAlpha = 1;
+
+            // Pipes
+            pipes.forEach(pipe => {
+                const gradient = ctx.createLinearGradient(pipe.x, 0, pipe.x + pipeWidth, 0);
+                gradient.addColorStop(0, '#22c55e');
+                gradient.addColorStop(0.5, '#4ade80');
+                gradient.addColorStop(1, '#22c55e');
+                
+                ctx.fillStyle = gradient;
+                // Top pipe
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+                ctx.fillRect(pipe.x - 5, pipe.topHeight - 20, pipeWidth + 10, 20);
+                // Bottom pipe
+                ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
+                ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 20);
+            });
+
+            // Bird
+            ctx.save();
+            ctx.translate(bird.x, bird.y);
+            ctx.rotate(bird.rotation * Math.PI / 180);
+            
+            // Glow
+            ctx.shadowColor = '#fbbf24';
+            ctx.shadowBlur = 20;
+            
+            // Body
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(5, -3, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(7, -3, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beak
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.moveTo(12, 0);
+            ctx.lineTo(22, 3);
+            ctx.lineTo(12, 6);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (gameState === 'playing') {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function gameOver() {
+            gameState = 'gameover';
+            cancelAnimationFrame(animationId);
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('flappy_high', highScore);
+            }
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('highScore').textContent = `Best: ${highScore}`;
+            document.getElementById('gameOverOverlay').classList.remove('hidden');
+        }
+
+        function startGame() {
+            resetGame();
+            gameState = 'playing';
+            document.getElementById('startOverlay').classList.add('hidden');
+            document.getElementById('gameOverOverlay').classList.add('hidden');
+            gameLoop();
+        }
+
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameState === 'start') startGame();
+                else flap();
+            }
+        });
+
+        canvas.addEventListener('click', () => {
+            if (gameState === 'playing') flap();
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState === 'playing') flap();
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('retryBtn').addEventListener('click', startGame);
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>

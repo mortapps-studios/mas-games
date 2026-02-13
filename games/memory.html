@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Memory Match - MortApps Studios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);
+            color: #ffffff;
+            user-select: none;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-logo {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        }
+
+        .brand-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #00d4ff;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .diff-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .diff-btn.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        }
+
+        .card-grid {
+            display: grid;
+            gap: 0.5rem;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .card {
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            border-radius: 0.75rem;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s 0.3s;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .card-back {
+            background: #1a3a5c;
+            transform: rotateY(180deg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 22, 40, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay-content {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .overlay-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .overlay-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .overlay-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+
+        .final-stat {
+            text-align: center;
+        }
+
+        .final-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .final-stat-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .footer {
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">
+            <div class="brand-logo">🃏</div>
+            <span class="brand-name">MortApps Studios</span>
+        </div>
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-label">MOVES</div>
+                <div id="movesDisplay" class="stat-value">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">MATCHES</div>
+                <div id="matchesDisplay" class="stat-value">0/0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">TIME</div>
+                <div id="timeDisplay" class="stat-value">0:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="difficulty-selector">
+            <button class="diff-btn active" data-size="4">Easy (4x4)</button>
+            <button class="diff-btn" data-size="6">Medium (6x6)</button>
+            <button class="diff-btn" data-size="8">Hard (8x4)</button>
+        </div>
+        <div id="cardGrid" class="card-grid"></div>
+    </div>
+
+    <div id="winOverlay" class="overlay hidden">
+        <div class="overlay-content">
+            <div class="overlay-emoji">🎉</div>
+            <h2 class="overlay-title">You Won!</h2>
+            <div class="stats-row">
+                <div class="final-stat">
+                    <div id="finalMoves" class="final-stat-value">0</div>
+                    <div class="final-stat-label">Moves</div>
+                </div>
+                <div class="final-stat">
+                    <div id="finalTime" class="final-stat-value">0:00</div>
+                    <div class="final-stat-label">Time</div>
+                </div>
+            </div>
+            <button id="playAgainBtn" class="btn-primary">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 MortApps Studios</p>
+    </div>
+
+    <script>
+        const cardGrid = document.getElementById('cardGrid');
+        const movesDisplay = document.getElementById('movesDisplay');
+        const matchesDisplay = document.getElementById('matchesDisplay');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const winOverlay = document.getElementById('winOverlay');
+
+        // Emojis for cards
+        const allEmojis = ['🍎', '🍊', '🍋', '🍇', '🍓', '🫐', '🍑', '🥝', '🌸', '🌺', '🌻', '🌷', '🦋', '🐝', '🐞', '🦀', '🐢', '🦄', '🐱', '🐶', '🐰', '🦊', '🐼', '🐨', '🌟', '⭐', '🌙', '☀️', '🌈', '❄️', '🔥', '💎'];
+
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let totalPairs = 0;
+        let moves = 0;
+        let gridSize = 4;
+        let gameStarted = false;
+        let timer = null;
+        let seconds = 0;
+
+        // Initialize game
+        function initGame() {
+            // Clear previous game
+            cardGrid.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            seconds = 0;
+            gameStarted = false;
+            
+            if (timer) clearInterval(timer);
+            timer = null;
+
+            // Setup grid
+            const cols = gridSize === 8 ? 8 : gridSize;
+            const rows = gridSize === 8 ? 4 : gridSize;
+            totalPairs = (cols * rows) / 2;
+            
+            cardGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            
+            // Calculate card size
+            const containerWidth = Math.min(window.innerWidth - 32, 500);
+            const cardSize = (containerWidth - (cols - 1) * 8) / cols;
+
+            // Create card pairs
+            const selectedEmojis = allEmojis.slice(0, totalPairs);
+            const cardValues = [...selectedEmojis, ...selectedEmojis];
+            shuffleArray(cardValues);
+
+            // Create cards
+            cardValues.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.width = `${cardSize}px`;
+                card.style.height = `${cardSize}px`;
+                card.dataset.value = emoji;
+                card.dataset.index = index;
+
+                card.innerHTML = `
+                    <div class="card-face card-front">?</div>
+                    <div class="card-face card-back">${emoji}</div>
+                `;
+
+                card.addEventListener('click', () => flipCard(card));
+                cardGrid.appendChild(card);
+                cards.push(card);
+            });
+
+            updateUI();
+            winOverlay.classList.add('hidden');
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function flipCard(card) {
+            if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
+                return;
+            }
+
+            // Start timer on first flip
+            if (!gameStarted) {
+                gameStarted = true;
+                timer = setInterval(() => {
+                    seconds++;
+                    updateTime();
+                }, 1000);
+            }
+
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                updateUI();
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const match = card1.dataset.value === card2.dataset.value;
+
+            if (match) {
+                matchedPairs++;
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                flippedCards = [];
+                updateUI();
+
+                if (matchedPairs === totalPairs) {
+                    setTimeout(gameWon, 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function updateUI() {
+            movesDisplay.textContent = moves;
+            matchesDisplay.textContent = `${matchedPairs}/${totalPairs}`;
+        }
+
+        function updateTime() {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timeDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function gameWon() {
+            if (timer) clearInterval(timer);
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalTime').textContent = timeDisplay.textContent;
+            winOverlay.classList.remove('hidden');
+        }
+
+        // Difficulty buttons
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gridSize = parseInt(btn.dataset.size);
+                initGame();
+            });
+        });
+
+        document.getElementById('playAgainBtn').addEventListener('click', initGame);
+
+        // Start game
+        initGame();
+    </script>
+</body>
+</html>

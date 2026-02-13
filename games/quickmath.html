@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Quick Math - MortApps Studios</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2a2a0a 0%, #4a4a1a 100%);
+            color: #fff;
+            user-select: none;
+        }
+        .header {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .brand { display: flex; align-items: center; gap: 0.5rem; }
+        .brand-logo {
+            width: 2rem; height: 2rem; border-radius: 0.5rem;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+        }
+        .brand-name { font-weight: bold; }
+        .game-stats { display: flex; gap: 1.5rem; }
+        .stat { text-align: center; }
+        .stat-label { font-size: 0.7rem; opacity: 0.7; }
+        .stat-value { font-weight: bold; font-size: 1.5rem; color: #eab308; }
+        .game-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .timer-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+            transition: width 0.1s linear;
+        }
+        .equation {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #eab308;
+        }
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .answer-btn {
+            padding: 1.5rem;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(234, 179, 8, 0.2);
+            color: #fff;
+            border: 2px solid rgba(234, 179, 8, 0.3);
+            transition: all 0.2s;
+        }
+        .answer-btn:hover { background: rgba(234, 179, 8, 0.4); }
+        .answer-btn.correct {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+        .answer-btn.wrong {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+        .streak { font-size: 1rem; color: #22c55e; margin-top: 1rem; }
+        .overlay {
+            position: fixed; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+        }
+        .overlay.hidden { display: none; }
+        .overlay-content { text-align: center; padding: 2rem; }
+        .overlay-emoji { font-size: 4rem; margin-bottom: 1rem; }
+        .overlay-title { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; color: #eab308; }
+        .overlay-subtitle { font-size: 0.9rem; opacity: 0.7; margin-bottom: 1.5rem; }
+        .btn-primary {
+            padding: 0.75rem 2rem; border: none; border-radius: 0.75rem;
+            font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #000;
+        }
+        .stats-row { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0; }
+        .final-stat { text-align: center; }
+        .final-stat-value { font-size: 2rem; font-weight: bold; color: #eab308; }
+        .final-stat-label { font-size: 0.8rem; opacity: 0.7; }
+        .footer { margin-top: 1.5rem; font-size: 0.75rem; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">
+            <div class="brand-logo">➕</div>
+            <span class="brand-name">MortApps Studios</span>
+        </div>
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-label">SCORE</div>
+                <div id="scoreDisplay" class="stat-value">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">BEST</div>
+                <div id="bestDisplay" class="stat-value">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="timer-bar">
+            <div id="timerFill" class="timer-fill" style="width: 100%"></div>
+        </div>
+        <div id="equation" class="equation">? + ? = ?</div>
+        <div id="answers" class="answers"></div>
+        <div id="streak" class="streak"></div>
+    </div>
+
+    <div id="startOverlay" class="overlay">
+        <div class="overlay-content">
+            <div class="overlay-emoji">➕</div>
+            <h1 class="overlay-title">Quick Math</h1>
+            <p class="overlay-subtitle">Solve equations before time runs out!</p>
+            <button id="startBtn" class="btn-primary">▶ Start</button>
+        </div>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay hidden">
+        <div class="overlay-content">
+            <div class="overlay-emoji">⏱️</div>
+            <h2 class="overlay-title">Time's Up!</h2>
+            <div class="stats-row">
+                <div class="final-stat">
+                    <div id="finalScore" class="final-stat-value">0</div>
+                    <div class="final-stat-label">Score</div>
+                </div>
+                <div class="final-stat">
+                    <div id="finalCorrect" class="final-stat-value">0</div>
+                    <div class="final-stat-label">Correct</div>
+                </div>
+                <div class="final-stat">
+                    <div id="finalStreak" class="final-stat-value">0</div>
+                    <div class="final-stat-label">Best Streak</div>
+                </div>
+            </div>
+            <button id="retryBtn" class="btn-primary">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <div class="footer"><p>© 2026 MortApps Studios</p></div>
+
+    <script>
+        let score = 0;
+        let best = parseInt(localStorage.getItem('math_best')) || 0;
+        let correct = 0;
+        let streak = 0;
+        let bestStreak = 0;
+        let timeLeft = 100;
+        let currentAnswer = 0;
+        let gameInterval = null;
+        let gameState = 'start';
+
+        document.getElementById('bestDisplay').textContent = best;
+
+        function generateEquation() {
+            const ops = ['+', '-', '×'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            let a, b;
+
+            if (op === '+') {
+                a = Math.floor(Math.random() * 20) + 1;
+                b = Math.floor(Math.random() * 20) + 1;
+                currentAnswer = a + b;
+            } else if (op === '-') {
+                a = Math.floor(Math.random() * 20) + 10;
+                b = Math.floor(Math.random() * a);
+                currentAnswer = a - b;
+            } else {
+                a = Math.floor(Math.random() * 12) + 1;
+                b = Math.floor(Math.random() * 12) + 1;
+                currentAnswer = a * b;
+            }
+
+            document.getElementById('equation').textContent = `${a} ${op} ${b} = ?`;
+
+            // Generate wrong answers
+            const answers = [currentAnswer];
+            while (answers.length < 4) {
+                const wrong = currentAnswer + Math.floor(Math.random() * 21) - 10;
+                if (wrong !== currentAnswer && wrong >= 0 && !answers.includes(wrong)) {
+                    answers.push(wrong);
+                }
+            }
+
+            // Shuffle
+            answers.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('answers');
+            container.innerHTML = '';
+            answers.forEach(ans => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = ans;
+                btn.addEventListener('click', () => checkAnswer(ans, btn));
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(ans, btn) {
+            if (gameState !== 'playing') return;
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(b => b.style.pointerEvents = 'none');
+
+            if (ans === currentAnswer) {
+                btn.classList.add('correct');
+                score += 10 + streak * 2;
+                correct++;
+                streak++;
+                if (streak > bestStreak) bestStreak = streak;
+                timeLeft = Math.min(100, timeLeft + 15);
+                document.getElementById('scoreDisplay').textContent = score;
+                document.getElementById('streak').textContent = streak > 1 ? `🔥 ${streak} streak!` : '';
+            } else {
+                btn.classList.add('wrong');
+                buttons.forEach(b => {
+                    if (parseInt(b.textContent) === currentAnswer) b.classList.add('correct');
+                });
+                streak = 0;
+                timeLeft -= 20;
+                document.getElementById('streak').textContent = '';
+            }
+
+            setTimeout(() => {
+                if (gameState === 'playing') generateEquation();
+            }, 500);
+        }
+
+        function updateTimer() {
+            timeLeft -= 2;
+            document.getElementById('timerFill').style.width = `${Math.max(0, timeLeft)}%`;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            correct = 0;
+            streak = 0;
+            bestStreak = 0;
+            timeLeft = 100;
+            gameState = 'playing';
+
+            document.getElementById('scoreDisplay').textContent = '0';
+            document.getElementById('streak').textContent = '';
+            document.getElementById('startOverlay').classList.add('hidden');
+            document.getElementById('gameOverOverlay').classList.add('hidden');
+
+            generateEquation();
+            gameInterval = setInterval(updateTimer, 100);
+        }
+
+        function endGame() {
+            gameState = 'gameover';
+            clearInterval(gameInterval);
+            
+            if (score > best) {
+                best = score;
+                localStorage.setItem('math_best', best);
+                document.getElementById('bestDisplay').textContent = best;
+            }
+
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCorrect').textContent = correct;
+            document.getElementById('finalStreak').textContent = bestStreak;
+            document.getElementById('gameOverOverlay').classList.remove('hidden');
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('retryBtn').addEventListener('click', startGame);
+    </script>
+</body>
+</html>

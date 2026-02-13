@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MortApps Studios - Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5b4cdb;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --background: #0a0a0f;
+            --surface: #1a1a2e;
+            --surface-light: #2d2d44;
+            --text: #ffffff;
+            --text-muted: #a0a0b0;
+            --success: #00b894;
+            --warning: #fdcb6e;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #151525 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .brand-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--text) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--text) 0%, var(--primary) 50%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--surface);
+            color: var(--text-muted);
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--primary);
+            color: var(--text);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        /* Games Grid */
+        .games-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title h3 {
+            font-size: 1.3rem;
+        }
+
+        .section-title .count {
+            background: var(--surface-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Game Card */
+        .game-card {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--primary);
+        }
+
+        .game-thumbnail {
+            position: relative;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--surface-light) 0%, var(--surface) 100%);
+        }
+
+        .game-thumbnail::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, var(--surface) 100%);
+        }
+
+        .game-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 1;
+        }
+
+        .badge-new {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .badge-popular {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .badge-classic {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .game-info {
+            padding: 1.25rem;
+        }
+
+        .game-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-description {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .game-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .game-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--warning);
+        }
+
+        .game-category {
+            color: var(--text-muted);
+            background: var(--surface-light);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .play-btn {
+            width: 100%;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--text);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .play-btn.coming-soon {
+            background: var(--surface-light);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .play-btn.coming-soon:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--surface-light);
+            color: var(--text-muted);
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo span {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-stats {
+                display: none;
+            }
+
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .games-section {
+                padding: 0 1rem 3rem;
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="brand">
+                <div class="brand-logo">🎮</div>
+                <div class="brand-text">
+                    <h1>MortApps Studios</h1>
+                    <p>Front-End Games, Pure Code, Pure Fun</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Games</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h2>🎮 Play Free Browser Games</h2>
+        <p>No downloads, no installs. Just click and play! All games work on PC and mobile. Built with pure front-end code.</p>
+    </section>
+
+    <!-- Categories -->
+    <div class="categories">
+        <button class="category-btn active" data-category="all">All Games</button>
+        <button class="category-btn" data-category="arcade">🎮 Arcade</button>
+        <button class="category-btn" data-category="puzzle">🧩 Puzzle</button>
+        <button class="category-btn" data-category="word">📝 Word</button>
+        <button class="category-btn" data-category="brain">🧠 Brain</button>
+    </div>
+
+    <!-- Games Section -->
+    <section class="games-section">
+        <div class="section-title">
+            <h3>🎮 All Games</h3>
+            <span class="count">12 games</span>
+        </div>
+
+        <div class="games-grid">
+            <!-- Snake Classic -->
+            <div class="game-card" data-category="arcade">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);">
+                    <span class="game-badge badge-classic">Classic</span>
+                    🐍
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Snake Classic</h4>
+                    <p class="game-description">Eat food, grow longer, avoid walls! The timeless arcade game with modern neon graphics and multiple themes.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.8</div>
+                        <span class="game-category">Arcade</span>
+                    </div>
+                    <a href="games/snake.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Breakout -->
+            <div class="game-card" data-category="arcade">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%);">
+                    <span class="game-badge badge-new">New</span>
+                    🧱
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Breakout</h4>
+                    <p class="game-description">Smash bricks with your paddle! Classic brick breaker action with power-ups and multiple levels.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.6</div>
+                        <span class="game-category">Arcade</span>
+                    </div>
+                    <a href="games/breakout.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Memory Match -->
+            <div class="game-card" data-category="puzzle">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);">
+                    <span class="game-badge badge-popular">Popular</span>
+                    🃏
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Memory Match</h4>
+                    <p class="game-description">Flip cards and find matching pairs! Test your memory with increasing difficulty levels.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.7</div>
+                        <span class="game-category">Puzzle</span>
+                    </div>
+                    <a href="games/memory.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- 2048 -->
+            <div class="game-card" data-category="puzzle">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #1a2a1a 0%, #2d4a2d 100%);">
+                    <span class="game-badge badge-classic">Classic</span>
+                    🔢
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">2048</h4>
+                    <p class="game-description">Slide and merge tiles to reach 2048! Addictive number puzzle that's easy to learn, hard to master.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.9</div>
+                        <span class="game-category">Puzzle</span>
+                    </div>
+                    <a href="games/2048.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Wordle Clone -->
+            <div class="game-card" data-category="word">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #2a1a1a 0%, #4a2d2d 100%);">
+                    <span class="game-badge badge-popular">Popular</span>
+                    📝
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Wordle Clone</h4>
+                    <p class="game-description">Guess the 5-letter word in 6 tries! Color hints guide you to the answer. New word every game!</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.8</div>
+                        <span class="game-category">Word</span>
+                    </div>
+                    <a href="games/wordle.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Flappy Ball -->
+            <div class="game-card" data-category="arcade">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #1a3a1a 0%, #2d5a2d 100%);">
+                    <span class="game-badge badge-new">New</span>
+                    🐦
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Flappy Ball</h4>
+                    <p class="game-description">Tap to fly through obstacles! Simple one-button gameplay that's infuriatingly addictive.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.5</div>
+                        <span class="game-category">Arcade</span>
+                    </div>
+                    <a href="games/flappy.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Whack-a-Mole -->
+            <div class="game-card" data-category="arcade">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #3a2a1a 0%, #5a4a2d 100%);">
+                    <span class="game-badge badge-classic">Classic</span>
+                    🔨
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Whack-a-Mole</h4>
+                    <p class="game-description">Tap moles before they hide! Test your reaction speed in this fast-paced arcade classic.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.4</div>
+                        <span class="game-category">Arcade</span>
+                    </div>
+                    <a href="games/whackamole.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Tetris -->
+            <div class="game-card" data-category="puzzle">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 100%);">
+                    <span class="game-badge badge-classic">Classic</span>
+                    🧩
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Tetris</h4>
+                    <p class="game-description">Stack falling blocks, clear lines, don't top out! The legendary puzzle game that started it all.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 5.0</div>
+                        <span class="game-category">Puzzle</span>
+                    </div>
+                    <a href="games/tetris.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Quick Math -->
+            <div class="game-card" data-category="brain">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #2a2a0a 0%, #4a4a1a 100%);">
+                    <span class="game-badge badge-new">New</span>
+                    ➕
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Quick Math</h4>
+                    <p class="game-description">Solve equations against the clock! Train your brain with fast-paced arithmetic challenges.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.6</div>
+                        <span class="game-category">Brain</span>
+                    </div>
+                    <a href="games/quickmath.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Color Match -->
+            <div class="game-card" data-category="brain">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #2a0a2a 0%, #4a1a4a 100%);">
+                    <span class="game-badge badge-popular">Popular</span>
+                    🎨
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Color Match</h4>
+                    <p class="game-description">Match colors or words faster than your brain can process! Tricky Stroop test reaction game.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.5</div>
+                        <span class="game-category">Brain</span>
+                    </div>
+                    <a href="games/colormatch.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Clicker Empire -->
+            <div class="game-card" data-category="arcade">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #1a1a0a 0%, #3a3a1a 100%);">
+                    <span class="game-badge badge-new">New</span>
+                    👆
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Clicker Empire</h4>
+                    <p class="game-description">Click to build points, unlock upgrades, and automate your empire! Addictive idle gameplay.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.3</div>
+                        <span class="game-category">Arcade</span>
+                    </div>
+                    <a href="games/clicker.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+
+            <!-- Space Dodger -->
+            <div class="game-card" data-category="arcade">
+                <div class="game-thumbnail" style="background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);">
+                    <span class="game-badge badge-new">New</span>
+                    🚀
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Space Dodger</h4>
+                    <p class="game-description">Dodge asteroids in deep space! Survive as long as you can in this endless cosmic challenge.</p>
+                    <div class="game-meta">
+                        <div class="game-rating">⭐ 4.7</div>
+                        <span class="game-category">Arcade</span>
+                    </div>
+                    <a href="games/spacedodger.html" class="play-btn">▶ Play Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-logo">
+            <span>🎮</span>
+            <strong>MortApps Studios</strong>
+        </div>
+        <p>© 2026 MortApps Studios. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+        </div>
+    </footer>
+
+    <script>
+        // Category filtering
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active button
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Filter games
+                const category = btn.dataset.category;
+                document.querySelectorAll('.game-card').forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Update count
+                const visibleCount = document.querySelectorAll(`.game-card${category === 'all' ? '' : `[data-category="${category}"]`}`).length;
+                document.querySelector('.count').textContent = `${visibleCount} games`;
+            });
+        });
+    </script>
+</body>
+</html>
